@@ -3,27 +3,30 @@ name: Deploy to Production
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
     
     steps:
-    - uses: actions/checkout@v4
-    
     - name: Deploy to server
-      uses: appleboy/ssh-action@v1.0.3
+      uses: appleboy/ssh-action@v0.1.5
       with:
         host: 178.208.187.240
         username: root
-        key: ${{ secrets.SERVER_SSH_KEY }}
+        key: ${{ secrets.SSH_KEY }}
         script: |
           cd /var/www/qrenuapi
+          echo "🔄 Pulling latest changes..."
           git pull origin master
+          
+          echo "🛑 Stopping containers..."
           docker compose -f docker-compose.prod.yml down
-          docker compose -f docker-compose.prod.yml build --no-cache
-          docker compose -f docker-compose.prod.yml up -d
-          docker system prune -f
+          
+          echo "🏗️ Building and starting containers..."
+          docker compose -f docker-compose.prod.yml up -d --build
+          
+          echo "✅ Checking container status..."
+          docker compose -f docker-compose.prod.yml ps
+          
+          echo "🎉 Deployment completed!"
