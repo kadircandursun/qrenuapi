@@ -1,0 +1,23 @@
+# Development Dockerfile
+FROM node:20-alpine
+
+# Çalışma dizinini ayarla
+WORKDIR /app
+
+# Sistem bağımlılıklarını yükle
+RUN apk add --no-cache python3 make g++
+
+# Package dosyalarını kopyala
+COPY package*.json ./
+
+# Bağımlılıkları yükle
+RUN npm ci
+
+# Kaynak kodunu kopyala
+COPY . .
+
+# Port'u expose et
+EXPOSE 3003
+
+# Development modunda başlat
+CMD ["sh", "-c", "echo 'Waiting for database...' && sleep 10 && echo 'Running migrations...' && npm run migration:up && echo 'Starting application...' && npm run start:dev"]

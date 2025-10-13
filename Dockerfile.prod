@@ -1,0 +1,59 @@
+# Production Dockerfile
+FROM node:20-alpine AS builder
+
+# Çalışma dizinini ayarla
+WORKDIR /app
+
+# Sistem bağımlılıklarını yükle
+RUN apk add --no-cache python3 make g++
+
+# Package dosyalarını kopyala
+COPY package*.json ./
+
+# Production bağımlılıklarını yükle
+RUN npm ci --only=production && npm cache clean --force
+
+# Kaynak kodunu kopyala
+COPY . .
+
+# Uygulamayı build et
+RUN npm run build
+
+# Production stage
+FROM node:20-alpine AS production
+
+# Çalışma dizinini ayarla
+WORKDIR /app
+
+# Sistem bağımlılıklarını yükle
+RUN apk add --no-cache python3 make g++
+
+# Package dosyalarını kopyala
+COPY package*.json ./
+
+# Production bağımlılıklarını yükle
+RUN npm ci --only=production && npm cache clean --force
+
+# Build edilmiş uygulamayı kopyala
+COPY --from=builder /app/dist ./dist
+
+# Uploads klasörünü oluştur
+RUN mkdir -p uploads/categories uploads/logos uploads/products
+
+# Non-root kullanıcı oluştur
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nestjs -u 1001
+
+# Dosya sahipliklerini ayarla
+RUN chown -R nestjs:nodejs /app
+USER nestjs
+
+# Port'u expose et
+EXPOSE 3003
+
+# Health check ekle
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3003/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+
+# Production modunda başlat
+CMD ["node", "dist/main.js"]

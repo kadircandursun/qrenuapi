@@ -46,29 +46,34 @@ async function bootstrap() {
   // Global exception filter
   app.useGlobalFilters(new GlobalExceptionFilter(app.get(AppLoggerService)));
   
-  // Swagger konfigürasyonu
-  const config = new DocumentBuilder()
-    .setTitle('QRenu API')
-    .setDescription('QRenu API dokümantasyonu')
-    .setVersion('1.0')
-    .addTag('health', 'Sistem sağlık durumu')
-    .addTag('auth', 'Kimlik doğrulama işlemleri')
-    .addTag('email-verification', 'Email doğrulama işlemleri')
-    .addTag('password-reset', 'Şifre sıfırlama işlemleri')
-    .addTag('restaurants', 'Restoran yönetimi işlemleri')
-    .addTag('categories', 'Kategori yönetimi işlemleri')
-    .addTag('products', 'Ürün yönetimi işlemleri')
-    .addTag('subscription', 'Paket yükseltme işlemleri')
-    .addTag('analytics', 'Restoran istatistikleri işlemleri')
-    .addTag('feedback', 'Geri bildirim işlemleri')
-    .addBearerAuth()
-    .build();
-  
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  // Swagger konfigürasyonu - sadece development'ta aktif
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('QRenu API')
+      .setDescription('QRenu API dokümantasyonu')
+      .setVersion('1.0')
+      .addTag('health', 'Sistem sağlık durumu')
+      .addTag('auth', 'Kimlik doğrulama işlemleri')
+      .addTag('email-verification', 'Email doğrulama işlemleri')
+      .addTag('password-reset', 'Şifre sıfırlama işlemleri')
+      .addTag('restaurants', 'Restoran yönetimi işlemleri')
+      .addTag('categories', 'Kategori yönetimi işlemleri')
+      .addTag('products', 'Ürün yönetimi işlemleri')
+      .addTag('subscription', 'Paket yükseltme işlemleri')
+      .addTag('analytics', 'Restoran istatistikleri işlemleri')
+      .addTag('feedback', 'Geri bildirim işlemleri')
+      .addBearerAuth()
+      .build();
+    
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
+  }
   
   await app.listen(process.env.PORT ?? 3001);
   console.log(`🚀 Uygulama çalışıyor: http://localhost:${process.env.PORT ?? 3001}`);
-  console.log(`📚 Swagger UI: http://localhost:${process.env.PORT ?? 3001}/api`);
+  
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`📚 Swagger UI: http://localhost:${process.env.PORT ?? 3001}/api`);
+  }
 }
 bootstrap();

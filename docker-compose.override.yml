@@ -1,0 +1,23 @@
+# Development override file
+# Bu dosya docker-compose up komutu çalıştırıldığında otomatik olarak yüklenir
+version: '3.8'
+
+services:
+  app:
+    environment:
+      NODE_ENV: development
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run start:dev
+
+  postgres:
+    environment:
+      POSTGRES_DB: qrenuapi_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+
+  redis:
+    command: redis-server --appendonly yes
+
+
