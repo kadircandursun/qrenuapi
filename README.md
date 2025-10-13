@@ -501,4 +501,5 @@ Bu proje MIT lisansı altında lisanslanmıştır.
 ---
 
 **QRenu API** - QR Menü Sistemi için RESTful API 🍽️#   T e s t   d e p l o y m e n t   -   1 0 / 1 3 / 2 0 2 5   2 0 : 0 9 : 1 9  
+ #   T e s t   d e p l o y m e n t   a f t e r   S S H   f i x   -   1 0 / 1 3 / 2 0 2 5   2 0 : 1 3 : 1 4  
  
