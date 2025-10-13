@@ -19,6 +19,9 @@ COPY . .
 # Uygulamayı build et
 RUN npm run build
 
+# Build çıktısını kontrol et
+RUN ls -la /app/dist/
+
 # Production stage
 FROM node:20-alpine AS production
 
@@ -36,6 +39,9 @@ RUN npm ci --only=production && npm cache clean --force
 
 # Build edilmiş uygulamayı kopyala
 COPY --from=builder /app/dist ./dist
+
+# Build çıktısını kontrol et
+RUN ls -la /app/dist/
 
 # Uploads klasörünü oluştur
 RUN mkdir -p uploads/categories uploads/logos uploads/products
