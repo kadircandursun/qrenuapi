@@ -20,7 +20,9 @@ COPY . .
 RUN npm run build
 
 # Build çıktısını kontrol et
-RUN ls -la /app/dist/
+RUN ls -la /app/
+RUN ls -la /app/dist/ || echo "dist klasörü bulunamadı"
+RUN find /app -name "*.js" -type f | head -10
 
 # Production stage
 FROM node:20-alpine AS production
