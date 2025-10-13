@@ -10,8 +10,8 @@ RUN apk add --no-cache python3 make g++
 # Package dosyalarını kopyala
 COPY package*.json ./
 
-# Production bağımlılıklarını yükle
-RUN npm ci --only=production && npm cache clean --force
+# Tüm bağımlılıkları yükle (build için dev dependencies gerekli)
+RUN npm ci && npm cache clean --force
 
 # Kaynak kodunu kopyala
 COPY . .
