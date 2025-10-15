@@ -1,44 +1,4 @@
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    container_name: qrenuapi-postgres-prod
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5434:5432"
-    volumes:
-      - postgres_data_prod:/var/lib/postgresql/data
-      - ./init-scripts:/docker-entrypoint-initdb.d
-    networks:
-      - qrenuapi-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # Redis Cache
-  redis:
-    image: redis:7-alpine
-    container_name: qrenuapi-redis-prod
-    ports:
-      - "6381:6379"
-    volumes:
-      - redis_data_prod:/data
-    networks:
-      - qrenuapi-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # QRenu API Application
   app:
     build:
       context: .
@@ -47,12 +7,12 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3004
-      DB_HOST: postgres
+      DB_HOST: shared-postgres
       DB_PORT: 5432
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-      REDIS_HOST: redis
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
+      DB_NAME: qrenuapi_prod
+      REDIS_HOST: shared-redis
       REDIS_PORT: 6379
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
@@ -64,13 +24,8 @@ services:
       - "3004:3004"
     volumes:
       - ./uploads:/app/uploads
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
     networks:
-      - qrenuapi-network
+      - shared-infrastructure_shared-network
       - tulukdev_tulukdev-network
     restart: unless-stopped
     healthcheck:
@@ -79,14 +34,8 @@ services:
       timeout: 10s
       retries: 3
 
-  # Nginx kaldırıldı - tulukdev nginx kullanılacak
-
-volumes:
-  postgres_data_prod:
-  redis_data_prod:
-
 networks:
-  qrenuapi-network:
-    driver: bridge
+  shared-infrastructure_shared-network:
+    external: true
   tulukdev_tulukdev-network:
     external: true
