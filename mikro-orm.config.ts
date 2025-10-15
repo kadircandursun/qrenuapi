@@ -21,7 +21,7 @@ export default defineConfig({
   entities: [User, Restaurant, Category, Product, Package, QrScanAnalytics, FavoriteAnalytics, SessionAnalytics, Feedback],
   entitiesTs: ['./src/**/*.entity.ts'],
   migrations: {
-    path: './dist/migrations',
+    path: './dist/src/migrations',
     pathTs: './src/migrations',
   },
   seeder: {
