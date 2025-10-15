@@ -20,6 +20,7 @@ services:
       MAILERSEND_API_KEY: ${MAILERSEND_API_KEY}
       MAILERSEND_FROM_EMAIL: ${MAILERSEND_FROM_EMAIL}
       MAILERSEND_FROM_NAME: ${MAILERSEND_FROM_NAME}
+      FRONTEND_URL: https://qrenu.com
     ports:
       - "3004:3004"
     volumes:
