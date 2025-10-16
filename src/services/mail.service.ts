@@ -17,7 +17,7 @@ export class MailService {
   constructor() {
     this.fromEmail = process.env.ZOHO_FROM_EMAIL || 'kadircandursun@icloud.com';
     
-    this.transporter = nodemailer.createTransporter({
+    this.transporter = nodemailer.createTransport({
       host: 'smtp.zoho.com',
       port: 587,
       secure: false, // TLS kullan

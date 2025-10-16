@@ -36,7 +36,7 @@ import { MailModule } from './mail.module';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: process.env.JWT_EXPIRES_IN || '24h' },
+        signOptions: { expiresIn: (process.env.JWT_EXPIRES_IN || '24h') as string },
       }),
       inject: [ConfigService],
     }),
