@@ -15,15 +15,15 @@ export class MailService {
   private readonly fromName = 'QRenu';
 
   constructor() {
-    this.fromEmail = process.env.ZOHO_FROM_EMAIL || 'kadircandursun@icloud.com';
+    this.fromEmail = process.env.ZOHO_FROM_EMAIL || 'support@tuluk.dev';
     
     this.transporter = nodemailer.createTransport({
-      host: 'smtp.zoho.com',
-      port: 587,
-      secure: false, // TLS kullan
+      host: 'smtppro.zoho.eu',
+      port: 465,
+      secure: true, // SSL kullan
       auth: {
-        user: process.env.ZOHO_SMTP_USER || 'kadircandursun@icloud.com',
-        pass: process.env.ZOHO_SMTP_PASSWORD || 'Catstrike60!',
+        user: process.env.ZOHO_SMTP_USER || 'support@tuluk.dev',
+        pass: process.env.ZOHO_SMTP_PASSWORD || '1ZrRerGNGAW4',
       },
     });
   }

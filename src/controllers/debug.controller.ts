@@ -15,6 +15,7 @@ import { SessionAnalytics } from '../entities/session-analytics.entity';
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class DebugController {
-  constructor(private readonly em: EntityManager) {}
-
+  constructor(
+    private readonly em: EntityManager,
+  ) {}
 }
