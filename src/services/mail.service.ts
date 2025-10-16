@@ -47,7 +47,30 @@ export class MailService {
 
       await this.mailerSend.email.send(emailParams);
     } catch (error) {
-      const errorMessage = error.message || error.toString() || 'Bilinmeyen hata';
+      // MailerSend API hatalarını detaylı logla
+      console.error('MailerSend API Error:', JSON.stringify(error, null, 2));
+      
+      let errorMessage = 'Bilinmeyen hata';
+      
+      // MailerSend API hata yapısını kontrol et
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.errors) {
+        // MailerSend validation hataları
+        const errors = error.response.data.errors;
+        if (Array.isArray(errors) && errors.length > 0) {
+          errorMessage = errors.map(err => err.message || err).join(', ');
+        } else if (typeof errors === 'object') {
+          errorMessage = JSON.stringify(errors);
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error.toString && error.toString() !== '[object Object]') {
+        errorMessage = error.toString();
+      }
+      
       throw new BadRequestException(`Email gönderim hatası: ${errorMessage}`);
     }
   }
