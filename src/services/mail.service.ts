@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { MailerSend, EmailParams, Sender, Recipient } from 'mailersend';
+import * as nodemailer from 'nodemailer';
 
 export interface SendEmailData {
   to: string;
@@ -10,17 +10,21 @@ export interface SendEmailData {
 
 @Injectable()
 export class MailService {
-  private readonly mailerSend: MailerSend;
-  private readonly fromEmail = 'no-reply@test-y7zpl98qjk545vx6.mlsender.net';
+  private readonly transporter: nodemailer.Transporter;
+  private readonly fromEmail: string;
   private readonly fromName = 'QRenu';
 
   constructor() {
-    const apiKey = process.env.SMTP_TOKEN;
-    if (!apiKey) {
-      throw new Error('SMTP_TOKEN environment variable is required');
-    }
-    this.mailerSend = new MailerSend({
-      apiKey: apiKey,
+    this.fromEmail = process.env.ZOHO_FROM_EMAIL || 'kadircandursun@icloud.com';
+    
+    this.transporter = nodemailer.createTransporter({
+      host: 'smtp.zoho.com',
+      port: 587,
+      secure: false, // TLS kullan
+      auth: {
+        user: process.env.ZOHO_SMTP_USER || 'kadircandursun@icloud.com',
+        pass: process.env.ZOHO_SMTP_PASSWORD || 'Catstrike60!',
+      },
     });
   }
 
@@ -31,44 +35,32 @@ export class MailService {
    */
   async sendEmail(emailData: SendEmailData): Promise<void> {
     try {
-      const sentFrom = new Sender(this.fromEmail, this.fromName);
-      
-      const recipients = [
-        new Recipient(emailData.to, emailData.to)
-      ];
+      const mailOptions = {
+        from: `${this.fromName} <${this.fromEmail}>`,
+        to: emailData.to,
+        subject: emailData.subject,
+        text: emailData.text,
+        html: emailData.html || emailData.text,
+      };
 
-      const emailParams = new EmailParams()
-        .setFrom(sentFrom)
-        .setTo(recipients)
-        .setReplyTo(sentFrom)
-        .setSubject(emailData.subject)
-        .setHtml(emailData.html || emailData.text)
-        .setText(emailData.text);
-
-      await this.mailerSend.email.send(emailParams);
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('Email gönderildi:', result.messageId);
     } catch (error) {
-      // MailerSend API hatalarını detaylı logla
-      console.error('MailerSend API Error:', JSON.stringify(error, null, 2));
+      // Zoho Mail hatalarını detaylı logla
+      console.error('Zoho Mail Error:', JSON.stringify(error, null, 2));
       
       let errorMessage = 'Bilinmeyen hata';
       
-      // MailerSend API hata yapısını kontrol et
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.response?.data?.errors) {
-        // MailerSend validation hataları
-        const errors = error.response.data.errors;
-        if (Array.isArray(errors) && errors.length > 0) {
-          errorMessage = errors.map(err => err.message || err).join(', ');
-        } else if (typeof errors === 'object') {
-          errorMessage = JSON.stringify(errors);
-        }
+      if (error.response) {
+        // SMTP response hatası
+        errorMessage = error.response;
+      } else if (error.code) {
+        // Nodemailer error code
+        errorMessage = `${error.code}: ${error.message}`;
       } else if (error.message) {
         errorMessage = error.message;
       } else if (typeof error === 'string') {
         errorMessage = error;
-      } else if (error.toString && error.toString() !== '[object Object]') {
-        errorMessage = error.toString();
       }
       
       throw new BadRequestException(`Email gönderim hatası: ${errorMessage}`);
