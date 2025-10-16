@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsOptional, IsUrl, MaxLength, IsBoolean, ValidateIf } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsUrl, MaxLength, IsBoolean, ValidateIf, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBase64Image } from '../decorators/base64-image.decorator';
 
@@ -16,6 +16,20 @@ export class UpdateRestaurantDto {
   @IsString({ message: 'Restoran adı string olmalıdır' })
   @MaxLength(100, { message: 'Restoran adı en fazla 100 karakter olabilir' })
   name?: string;
+
+  @ApiProperty({
+    description: 'Restoran subdomain (URL ön eki)',
+    example: 'lezzet-duragi',
+    maxLength: 63,
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Subdomain string olmalıdır' })
+  @MaxLength(63, { message: 'Subdomain en fazla 63 karakter olabilir' })
+  @Matches(/^[a-z0-9]([a-z0-9-]{1,61}[a-z0-9])?$/, {
+    message: 'Subdomain sadece küçük harf, rakam ve tire içerebilir. Tire ile başlayıp bitemez.',
+  })
+  subdomain?: string;
 
   @ApiProperty({
     description: 'Restoran açıklaması',

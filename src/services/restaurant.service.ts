@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository, EntityManager } from '@mikro-orm/core';
 import { Restaurant } from '../entities/restaurant.entity';
@@ -152,6 +152,21 @@ export class RestaurantService {
           throw new ForbiddenException('Logo kaydedilemedi: ' + error.message);
         }
       }
+    }
+
+    // Subdomain kontrolü ve güncelleme
+    if (updateRestaurantDto.subdomain !== undefined) {
+      // Subdomain benzersizlik kontrolü
+      const existingRestaurant = await this.restaurantRepository.findOne({
+        subdomain: updateRestaurantDto.subdomain,
+        id: { $ne: restaurantId } // Mevcut restoran hariç
+      });
+      
+      if (existingRestaurant) {
+        throw new ConflictException('Bu subdomain zaten kullanılıyor');
+      }
+      
+      restaurant.subdomain = updateRestaurantDto.subdomain;
     }
 
     // Restoranı güncelle - sadece gönderilen alanları güncelle
